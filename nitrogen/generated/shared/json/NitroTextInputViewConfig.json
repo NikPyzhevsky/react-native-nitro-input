@@ -1,0 +1,16 @@
+{
+  "uiViewClassName": "NitroTextInputView",
+  "supportsRawText": false,
+  "bubblingEventTypes": {},
+  "directEventTypes": {},
+  "validAttributes": {
+    "allowFontScaling": true,
+    "autoCapitalize": true,
+    "autoCorrect": true,
+    "onChangeText": true,
+    "value": true,
+    "multiline": true,
+    "placeholder": true,
+    "hybridRef": true
+  }
+}
