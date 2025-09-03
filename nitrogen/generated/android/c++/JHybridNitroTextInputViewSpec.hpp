@@ -61,6 +61,8 @@ namespace margelo::nitro::nitroinput {
     void setValue(const std::optional<std::string>& value) override;
     std::optional<bool> getMultiline() override;
     void setMultiline(std::optional<bool> multiline) override;
+    std::optional<bool> getSecureTextEntry() override;
+    void setSecureTextEntry(std::optional<bool> secureTextEntry) override;
     std::optional<std::string> getPlaceholder() override;
     void setPlaceholder(const std::optional<std::string>& placeholder) override;
 

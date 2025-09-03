@@ -60,6 +60,10 @@ void JHybridNitroTextInputViewStateUpdater::updateViewProps(jni::alias_ref<jni::
     view->setMultiline(props.multiline.value);
     // TODO: Set isDirty = false
   }
+  if (props.secureTextEntry.isDirty) {
+    view->setSecureTextEntry(props.secureTextEntry.value);
+    // TODO: Set isDirty = false
+  }
   if (props.placeholder.isDirty) {
     view->setPlaceholder(props.placeholder.value);
     // TODO: Set isDirty = false

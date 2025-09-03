@@ -85,6 +85,16 @@ namespace margelo::nitro::nitroinput::views {
         throw std::runtime_error(std::string("NitroTextInputView.multiline: ") + exc.what());
       }
     }()),
+    secureTextEntry([&]() -> CachedProp<std::optional<bool>> {
+      try {
+        const react::RawValue* rawValue = rawProps.at("secureTextEntry", nullptr, nullptr);
+        if (rawValue == nullptr) return sourceProps.secureTextEntry;
+        const auto& [runtime, value] = (std::pair<jsi::Runtime*, jsi::Value>)*rawValue;
+        return CachedProp<std::optional<bool>>::fromRawValue(*runtime, value, sourceProps.secureTextEntry);
+      } catch (const std::exception& exc) {
+        throw std::runtime_error(std::string("NitroTextInputView.secureTextEntry: ") + exc.what());
+      }
+    }()),
     placeholder([&]() -> CachedProp<std::optional<std::string>> {
       try {
         const react::RawValue* rawValue = rawProps.at("placeholder", nullptr, nullptr);
@@ -114,6 +124,7 @@ namespace margelo::nitro::nitroinput::views {
     onChangeText(other.onChangeText),
     value(other.value),
     multiline(other.multiline),
+    secureTextEntry(other.secureTextEntry),
     placeholder(other.placeholder),
     hybridRef(other.hybridRef) { }
 
@@ -125,6 +136,7 @@ namespace margelo::nitro::nitroinput::views {
       case hashString("onChangeText"): return true;
       case hashString("value"): return true;
       case hashString("multiline"): return true;
+      case hashString("secureTextEntry"): return true;
       case hashString("placeholder"): return true;
       case hashString("hybridRef"): return true;
       default: return false;

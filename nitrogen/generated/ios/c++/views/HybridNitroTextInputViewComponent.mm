@@ -101,6 +101,11 @@ using namespace margelo::nitro::nitroinput::views;
     swiftPart.setMultiline(newViewProps.multiline.value);
     newViewProps.multiline.isDirty = false;
   }
+  // secureTextEntry: optional
+  if (newViewProps.secureTextEntry.isDirty) {
+    swiftPart.setSecureTextEntry(newViewProps.secureTextEntry.value);
+    newViewProps.secureTextEntry.isDirty = false;
+  }
   // placeholder: optional
   if (newViewProps.placeholder.isDirty) {
     swiftPart.setPlaceholder(newViewProps.placeholder.value);

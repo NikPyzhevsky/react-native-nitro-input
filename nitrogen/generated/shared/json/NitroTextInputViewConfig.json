@@ -10,6 +10,7 @@
     "onChangeText": true,
     "value": true,
     "multiline": true,
+    "secureTextEntry": true,
     "placeholder": true,
     "hybridRef": true
   }
