@@ -60,6 +60,8 @@ namespace margelo::nitro::nitroinput {
       virtual void setValue(const std::optional<std::string>& value) = 0;
       virtual std::optional<bool> getMultiline() = 0;
       virtual void setMultiline(std::optional<bool> multiline) = 0;
+      virtual std::optional<bool> getSecureTextEntry() = 0;
+      virtual void setSecureTextEntry(std::optional<bool> secureTextEntry) = 0;
       virtual std::optional<std::string> getPlaceholder() = 0;
       virtual void setPlaceholder(const std::optional<std::string>& placeholder) = 0;
 

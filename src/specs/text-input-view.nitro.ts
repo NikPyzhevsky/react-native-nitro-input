@@ -14,6 +14,7 @@ export interface NitroTextInputViewProps extends HybridViewProps {
   onChangeText?: (value: string) => void
   value?: string
   multiline?: boolean
+  secureTextEntry?: boolean
   placeholder?: string
 }
 

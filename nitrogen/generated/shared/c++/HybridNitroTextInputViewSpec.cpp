@@ -26,6 +26,8 @@ namespace margelo::nitro::nitroinput {
       prototype.registerHybridSetter("value", &HybridNitroTextInputViewSpec::setValue);
       prototype.registerHybridGetter("multiline", &HybridNitroTextInputViewSpec::getMultiline);
       prototype.registerHybridSetter("multiline", &HybridNitroTextInputViewSpec::setMultiline);
+      prototype.registerHybridGetter("secureTextEntry", &HybridNitroTextInputViewSpec::getSecureTextEntry);
+      prototype.registerHybridSetter("secureTextEntry", &HybridNitroTextInputViewSpec::setSecureTextEntry);
       prototype.registerHybridGetter("placeholder", &HybridNitroTextInputViewSpec::getPlaceholder);
       prototype.registerHybridSetter("placeholder", &HybridNitroTextInputViewSpec::setPlaceholder);
     });

@@ -99,6 +99,13 @@ namespace margelo::nitro::nitroinput {
     inline void setMultiline(std::optional<bool> multiline) noexcept override {
       _swiftPart.setMultiline(multiline);
     }
+    inline std::optional<bool> getSecureTextEntry() noexcept override {
+      auto __result = _swiftPart.getSecureTextEntry();
+      return __result;
+    }
+    inline void setSecureTextEntry(std::optional<bool> secureTextEntry) noexcept override {
+      _swiftPart.setSecureTextEntry(secureTextEntry);
+    }
     inline std::optional<std::string> getPlaceholder() noexcept override {
       auto __result = _swiftPart.getPlaceholder();
       return __result;

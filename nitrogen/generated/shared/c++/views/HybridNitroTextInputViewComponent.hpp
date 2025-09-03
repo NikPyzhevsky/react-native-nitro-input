@@ -26,6 +26,7 @@
 #include <string>
 #include <optional>
 #include <optional>
+#include <optional>
 #include <string>
 #include <optional>
 #include <memory>
@@ -60,6 +61,7 @@ namespace margelo::nitro::nitroinput::views {
     CachedProp<std::optional<std::function<void(const std::string& /* value */)>>> onChangeText;
     CachedProp<std::optional<std::string>> value;
     CachedProp<std::optional<bool>> multiline;
+    CachedProp<std::optional<bool>> secureTextEntry;
     CachedProp<std::optional<std::string>> placeholder;
     CachedProp<std::optional<std::function<void(const std::shared_ptr<HybridNitroTextInputViewSpec>& /* ref */)>>> hybridRef;
 

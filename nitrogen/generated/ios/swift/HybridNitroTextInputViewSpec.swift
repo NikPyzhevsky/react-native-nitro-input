@@ -17,6 +17,7 @@ public protocol HybridNitroTextInputViewSpec_protocol: HybridObject, HybridView 
   var onChangeText: ((_ value: String) -> Void)? { get set }
   var value: String? { get set }
   var multiline: Bool? { get set }
+  var secureTextEntry: Bool? { get set }
   var placeholder: String? { get set }
 
   // Methods

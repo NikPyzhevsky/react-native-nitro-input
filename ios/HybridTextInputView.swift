@@ -3,110 +3,126 @@ import NitroModules
 import SwiftUI
 
 // MARK: - SwiftUI TextField View
-struct SwiftUITextField: View {
-    @Binding var text: String
-    var placeholder: String?
-    var allowFontScaling: Bool
-    var autoCapitalize: UITextAutocapitalizationType
-    var autoCorrect: UITextAutocorrectionType
+final class TextFieldState: ObservableObject {
+    @Published var text: String = ""
+    @Published var isSecure: Bool = false
 
-    var backgroundColor: Color
-    var textColor: Color
-    var cursorColor: UIColor
+    @Published var placeholder: String? = nil
+    @Published var allowFontScaling: Bool = true
+    @Published var autoCapitalize: UITextAutocapitalizationType = .sentences
+    @Published var autoCorrect: UITextAutocorrectionType = .default
+
+    @Published var backgroundColor: Color = .clear
+    @Published var textColor: Color = .primary
+    @Published var cursorColor: UIColor = {
+        if #available(iOS 15.0, *) { return .tintColor }
+        return .systemBlue
+    }()
+}
+
+// MARK: - SwiftUI view (подписан на state)
+private struct SwiftUITextFieldView: View {
+    @ObservedObject var state: TextFieldState
+    var onChangeText: (String) -> Void
 
     var body: some View {
-        TextField(placeholder ?? "", text: $text)
-            .font(.body)
-            .foregroundColor(textColor)
-//            .multilineTextAlignment(.center)
-            .autocapitalization(autoCapitalize)
-            .disableAutocorrection(autoCorrect == .no)
-            .padding(0)
-            .cornerRadius(0)
-            .tint(Color(cursorColor)) // SwiftUI 3+
+        ZStack { state.backgroundColor
+            HStack(spacing: 8) {
+                if state.isSecure {
+                    SecureField(state.placeholder ?? "", text: Binding(
+                        get: { state.text },
+                        set: { newVal in
+                            state.text = newVal
+                            onChangeText(newVal)
+                        }
+                    ))
+                    .textInputAutocapitalization(state.autoCapitalize.swiftUI)
+                    .disableAutocorrection(state.autoCorrect == .no)
+                    .foregroundColor(state.textColor)
+                    .tint(Color(state.cursorColor))
+                } else {
+                    TextField(state.placeholder ?? "", text: Binding(
+                        get: { state.text },
+                        set: { newVal in
+                            state.text = newVal
+                            onChangeText(newVal)
+                        }
+                    ))
+                    .textInputAutocapitalization(state.autoCapitalize.swiftUI)
+                    .disableAutocorrection(state.autoCorrect == .no)
+                    .foregroundColor(state.textColor)
+                    .tint(Color(state.cursorColor))
+                }
+            }
+            .padding(.horizontal, 0)
+            .padding(.vertical, 0)
+        }
+        .allowsTightening(state.allowFontScaling)
     }
 }
 
-// MARK: - UIKit Wrapper for Nitro
-class HybridTextInputView: HybridNitroTextInputViewSpec {
-    var value: String?
+// MARK: - Nitro wrapper
+final class HybridTextInputView: HybridNitroTextInputViewSpec {
 
+    var allowFontScaling: Bool?        { didSet { Task { @MainActor in state.allowFontScaling = allowFontScaling ?? true } } }
+    var autoCapitalize: AutoCapitalize?{ didSet { Task { @MainActor in state.autoCapitalize = (autoCapitalize ?? .sentences).uiKit } } }
+    var autoCorrect: Bool?             { didSet { Task { @MainActor in state.autoCorrect = (autoCorrect ?? true) ? .yes : .no } } }
+    var placeholder: String?           { didSet { Task { @MainActor in state.placeholder = placeholder } } }
+    var multiline: Bool? = false
+
+    var backgroundColor: String?       { didSet { Task { @MainActor in state.backgroundColor = Color(hex: backgroundColor) ?? .clear } } }
+    var textColor: String?             { didSet { Task { @MainActor in state.textColor = Color(hex: textColor) ?? .primary } } }
+    var cursorColor: String?           { didSet { Task { @MainActor in state.cursorColor = UIColor(hex: cursorColor) ?? .blue } } }
+
+    var secureTextEntry: Bool?         { didSet { Task { @MainActor in state.isSecure = secureTextEntry ?? false } } }
+
+    var value: String? {
+        didSet {
+            Task { @MainActor in
+                let newVal = value ?? ""
+                if state.text != newVal { state.text = newVal } // без зацикливания
+            }
+        }
+    }
     var onChangeText: ((String) -> Void)?
 
-    @State private var text: String = ""
-    var backgroundColor: String?
-    var textColor: String?
-    var cursorColor: String?
+    private var state = TextFieldState()
+    private let hostingController: UIHostingController<SwiftUITextFieldView>
 
-    private lazy var hostingController: UIHostingController<SwiftUITextField> = {
-        let textBinding = Binding(
-            get: { self.value ?? "" },
-            set: { newValue in
-                self.value = newValue
-                self.onChangeText?(newValue)
+    override init() {
+        let state = TextFieldState()
+
+        let tempView = SwiftUITextFieldView(state: state, onChangeText: { _ in })
+
+        self.state = state
+        self.hostingController = UIHostingController(rootView: tempView)
+        self.hostingController.view.backgroundColor = .clear
+
+        super.init()
+
+        self.hostingController.rootView = SwiftUITextFieldView(
+            state: self.state,
+            onChangeText: { [weak self] newVal in
+                guard let self else { return }
+                self.onChangeText?(newVal)
+                if self.value != newVal {
+                    self.value = newVal
+                }
             }
         )
-
-        let bgColor = Color(hex: self.backgroundColor) ?? .white
-        let fgColor = Color(hex: self.textColor) ?? .black
-        let caretColor = UIColor(hex: self.cursorColor) ?? .blue
-
-        let swiftUIView = SwiftUITextField(
-            text: textBinding,
-            placeholder: self.placeholder,
-            allowFontScaling: self.allowFontScaling ?? true,
-            autoCapitalize: .sentences,
-            autoCorrect: .default,
-            backgroundColor: bgColor,
-            textColor: fgColor,
-            cursorColor: caretColor
-        )
-
-        let controller = UIHostingController(rootView: swiftUIView)
-        controller.view.backgroundColor = .clear
-        return controller
-    }()
-//    override init() {
-//        let textBinding = Binding(
-//            get: { self.value ?? "" },
-//            set: { newValue in
-//                self.value = newValue
-//                self.onChangeText?(newValue)
-//            }
-//        )
-//
-//
-//        let bgColor = Color(hex: backgroundColor) ?? Color.white
-//        let fgColor = Color(hex: textColor) ?? Color.black
-//        let caretColor = UIColor(hex: cursorColor) ?? .blue
-//
-//        let swiftUIView = SwiftUITextField(
-//            text: textBinding,
-//            placeholder: nil,
-//            allowFontScaling: true,
-//            autoCapitalize: .sentences,
-//            autoCorrect: .default,
-//            backgroundColor: bgColor,
-//            textColor: fgColor,
-//            cursorColor: caretColor
-//        )
-//
-//        self.hostingController = UIHostingController(rootView: swiftUIView)
-//        self.hostingController.view.backgroundColor = .clear // 🔥 важно!
-//        super.init()
-//    }
-
-    var view: UIView {
-        return hostingController.view
     }
+    var view: UIView { hostingController.view }
 
-    // Props
-    var allowFontScaling: Bool? = true
-    var autoCapitalize: AutoCapitalize?
-    var autoCorrect: Bool? = true
-    var placeholder: String?
-    var multiline: Bool? = false
+    @objc func setPlaceholder(_ text: String?)            { self.placeholder = text }
+    @objc func setAllowFontScaling(_ allow: NSNumber?)    { self.allowFontScaling = allow?.boolValue }
+    @objc func setAutoCapitalize(_ cap: AutoCapitalize)   { self.autoCapitalize = cap }
+    @objc func setAutoCorrect(_ enabled: NSNumber?)       { self.autoCorrect = enabled?.boolValue }
+    @objc func setBackgroundColor(_ hex: String?)         { self.backgroundColor = hex }
+    @objc func setTextColor(_ hex: String?)               { self.textColor = hex }
+    @objc func setCursorColor(_ hex: String?)             { self.cursorColor = hex }
+    @objc func setSecureTextEntry(_ secure: NSNumber?)    { self.secureTextEntry = secure?.boolValue }
 }
+// MARK: - Helpers / Mappings
 
 extension UIColor {
     convenience init?(hex: String?) {
@@ -127,6 +143,7 @@ extension UIColor {
     }
 }
 
+
 extension Color {
     init?(hex: String?) {
         guard let hex = hex else { return nil }
@@ -144,4 +161,33 @@ extension Color {
 
         self.init(red: r, green: g, blue: b)
     }
+}
+
+private extension AutoCapitalize {
+    var uiKit: UITextAutocapitalizationType {
+        switch self {
+        case .none: return .none
+        case .words: return .words
+        case .sentences: return .sentences
+        case .characters: return .allCharacters
+        @unknown default: return .sentences
+        }
+    }
+}
+
+private extension UITextAutocapitalizationType {
+    var swiftUI: TextInputAutocapitalization {
+        switch self {
+        case .none: return .never
+        case .words: return .words
+        case .sentences: return .sentences
+        case .allCharacters: return .characters
+        @unknown default: return .sentences
+        }
+    }
+}
+
+private final class WeakBox<T> {
+    let getter: () -> T?
+    init(_ getter: @escaping () -> T?) { self.getter = getter }
 }
